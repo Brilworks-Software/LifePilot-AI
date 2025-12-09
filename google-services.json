@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "516389781142",
+    "project_id": "lifepilot-7e077",
+    "storage_bucket": "lifepilot-7e077.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:516389781142:android:15d5d029de30f9ea114cb7",
+        "android_client_info": {
+          "package_name": "com.brilworks.lifePilot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcrQHz6g1Ufk14ZJlKJLBtjp92y6CT2xQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

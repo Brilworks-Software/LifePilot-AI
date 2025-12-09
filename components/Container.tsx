@@ -1,13 +1,17 @@
-import { StyleSheet, SafeAreaView } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { observer } from 'mobx-react-lite';
+import {  useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export const Container = ({ children }: { children: React.ReactNode }) => {
-  return <SafeAreaView style={styles.container}>{children}</SafeAreaView>;
-};
+
+export const Container = observer(({ children }: { children: React.ReactNode }) => {
+  const {top} = useSafeAreaInsets()
+  return <View style={[styles.container, { paddingTop: top }]}>{children}</View>;
+});
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+    padding: 8,
     backgroundColor: 'white',
   },
 });
