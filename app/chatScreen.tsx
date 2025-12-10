@@ -241,26 +241,26 @@ export default function ChatScreen() {
 
   // Message Bubble Component with animations
   const MessageBubble = ({ msg, index }: { msg: Message; index: number }) => {
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-    const slideAnim = useRef(new Animated.Value(20)).current;
+    const fadeAnim = useRef(new Animated.Value(1)).current;
+    const slideAnim = useRef(new Animated.Value(0)).current;
 
-    useEffect(() => {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          delay: index * 50,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 300,
-          delay: index * 50,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, []);
+    // useEffect(() => {
+    //   Animated.parallel([
+    //     Animated.timing(fadeAnim, {
+    //       toValue: 1,
+    //       duration: 300,
+    //       delay: index * 50,
+    //       useNativeDriver: true,
+    //     }),
+    //     Animated.timing(slideAnim, {
+    //       toValue: 0,
+    //       duration: 300,
+    //       delay: index * 50,
+    //       easing: Easing.out(Easing.cubic),
+    //       useNativeDriver: true,
+    //     }),
+    //   ]).start();
+    // }, []);
 
     return (
       <Animated.View
