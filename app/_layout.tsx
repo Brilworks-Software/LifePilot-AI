@@ -44,7 +44,7 @@ export default function Layout() {
 
 export const PostHogUniversalProvider = ({ children }: { children: React.ReactNode }) => {
   if (Platform.OS === 'web') {
-    posthog.init('phc_KOO2AUb6Gx7bk7oz2xVsbBGTGAKVFQAHy9G5sE0Owka', {
+    posthog.init(process.env.EXPO_PUBLIC_POST_HOG_AP_KEY || "", {
       api_host: 'https://us.i.posthog.com',
       autocapture: true,
         capture_pageview: false, // we’ll control pageview manually
@@ -55,7 +55,7 @@ export const PostHogUniversalProvider = ({ children }: { children: React.ReactNo
 
   return (
     <PostHogProvider
-      apiKey="phc_KOO2AUb6Gx7bk7oz2xVsbBGTGAKVFQAHy9G5sE0Owka"
+      apiKey={process.env.EXPO_PUBLIC_POST_HOG_API_KEY || ""}
       options={{ host: 'https://us.i.posthog.com' }}
     >
       {children}
