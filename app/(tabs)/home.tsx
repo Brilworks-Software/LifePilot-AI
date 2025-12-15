@@ -1,12 +1,11 @@
 import { StyleSheet, Text, View, Pressable, ActivityIndicator, ScrollView, useWindowDimensions, Platform } from 'react-native'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { Container } from '@/components/Container'
 import { useRouter } from 'expo-router';
 import { useGeminiConfig } from '@/firebase/hooks/useGeminiConfig'
 import { GeminiConfigData } from '@/firebase/types';
 import { Sparkles, Wrench, Dumbbell, Brain, Calendar, ChevronRight } from 'lucide-react-native';
 import { geminiConfigStore } from '@/store/GeminiConfigStore';
-import { usePostHog } from 'posthog-react-native'
 
 // Icon mapping for each option
 const getIcon = (title: string) => {
@@ -38,7 +37,7 @@ export default function Home() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const { data: geminiConfig, isLoading, error } = useGeminiConfig()
-  const posthog = usePostHog();
+  const isNavigatingRef = useRef(false);
 
   // Responsive layout calculations
   const isWeb = Platform.OS === 'web';
@@ -53,9 +52,6 @@ export default function Home() {
     return 1;
   }, [isDesktop, isTablet]);
 
-  useEffect(() => {
-        posthog.capture(`Home screen loaded, user Id: ${posthog.getDistinctId()}`);
-    }, [])
 
   // Calculate responsive sizes
   const containerMaxWidth = isWeb && isDesktop ? 1200 : width;
@@ -88,9 +84,23 @@ export default function Home() {
   }, [geminiConfig]);
 
   const handlePress = (option: string) => {
+    // Prevent multiple navigations
+    if (isNavigatingRef.current) {
+      return;
+    }
+    
+    // Set navigation flag to prevent multiple taps
+    isNavigatingRef.current = true;
+    
     console.log(option);
     geminiConfigStore.setConfig(systemPromptMap[option]);
     router.push({pathname: '/chatScreen'});
+    
+    // Reset navigation flag after a delay to allow navigation to complete
+    // This prevents rapid taps from causing multiple navigations
+    setTimeout(() => {
+      isNavigatingRef.current = false;
+    }, 1000);
   }
 
   // Group options into rows based on columns

@@ -33,7 +33,6 @@ import WebMarkDown from '@/components/markdown/WebMarkDownComponent';
 import { ArrowLeft, Send, ImagePlus, Copy, Check } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { geminiConfigStore } from '@/store/GeminiConfigStore';
-import { usePostHog } from 'posthog-react-native';
 
 // Enhanced Color palette
 const COLORS = {
@@ -68,7 +67,6 @@ export default function ChatScreen() {
   const idRef = useRef(1);
   const scrollViewRef = useRef<ScrollView>(null);
   const getNextId = () => `msg-${idRef.current++}`;
-  const posthog = usePostHog();
 
   const role =
     AGENT_ROLE?.title && AGENT_ROLE
@@ -93,10 +91,6 @@ export default function ChatScreen() {
   useEffect(() => {
     setMessages(conversation?.messages || []);
   }, [conversation?.messages]);
-
-  useEffect(() => {
-        posthog.capture(`Chat screen loaded, user Id: ${posthog.getDistinctId()}, conversation Id: ${conversationRef} and role: ${role.title}`);
-    }, [])
 
   const onSendMessage = async () => {
     console.log(conversation?.id);
