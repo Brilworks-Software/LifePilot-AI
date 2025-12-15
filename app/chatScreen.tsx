@@ -33,6 +33,7 @@ import WebMarkDown from '@/components/markdown/WebMarkDownComponent';
 import { ArrowLeft, Send, ImagePlus, Copy, Check } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { geminiConfigStore } from '@/store/GeminiConfigStore';
+import { usePostHog } from 'posthog-react-native';
 
 // Enhanced Color palette
 const COLORS = {
@@ -67,7 +68,8 @@ export default function ChatScreen() {
   const idRef = useRef(1);
   const scrollViewRef = useRef<ScrollView>(null);
   const getNextId = () => `msg-${idRef.current++}`;
-  
+  const posthog = usePostHog();
+
   const role =
     AGENT_ROLE?.title && AGENT_ROLE
       ? AGENT_ROLE
@@ -78,7 +80,7 @@ export default function ChatScreen() {
           systemPrompt: 'You are a helpful assistant.',
           examples: ['Tell me a quick tip.', 'Help me brainstorm ideas.'],
         };
-  
+
   const { data: conversation, isLoading } = useConversation(AIConversationRef || '');
   const { currentUser: user } = useAuth();
   const { data: userData } = useUser(user?.uid || '');
@@ -92,12 +94,16 @@ export default function ChatScreen() {
     setMessages(conversation?.messages || []);
   }, [conversation?.messages]);
 
+  useEffect(() => {
+        posthog.capture(`Chat screen loaded, user Id: ${posthog.getDistinctId()}, conversation Id: ${conversationRef} and role: ${role.title}`);
+    }, [])
+
   const onSendMessage = async () => {
     console.log(conversation?.id);
     if (isSending || inputText.trim() === '') return;
     setIsSending(true);
     let ref = conversationRef;
-    
+
     if (conversationRef === '') {
       const newConv = await createConversationMutation.mutateAsync({
         userId: userData?.id || 'unknown',
@@ -114,7 +120,8 @@ export default function ChatScreen() {
       timestamp: new Date(),
       image: selectedImagebase64 || '',
     };
-    setSelectedImagebase64('');
+    setInputText('');
+    setSelectedImagebase64(null);
 
     const currentMessages = messages || [];
     const updatedThread = [...currentMessages, userMessage];
@@ -149,7 +156,7 @@ export default function ChatScreen() {
       messages: [...updatedThread, modelMessage],
     });
 
-    setInputText('');
+    
     setIsSending(false);
   };
 
@@ -163,10 +170,10 @@ export default function ChatScreen() {
 
   const formatTime = (timestamp: any) => {
     const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
+      hour12: true,
     });
   };
 
@@ -321,7 +328,12 @@ export default function ChatScreen() {
             ]}>
             <Text style={styles.timestampText}>{formatTime(msg.timestamp)}</Text>
             {msg.role === 'user' && (
-              <Ionicons name="checkmark-done" size={14} color={COLORS.primary} style={styles.checkmark} />
+              <Ionicons
+                name="checkmark-done"
+                size={14}
+                color={COLORS.primary}
+                style={styles.checkmark}
+              />
             )}
           </View>
         </View>
@@ -345,9 +357,7 @@ export default function ChatScreen() {
         <Ionicons name="chatbubble-outline" size={48} color={COLORS.primary} />
       </View>
       <Text style={styles.emptyStateTitle}>{role.title}</Text>
-      <Text style={styles.emptyStateDescription}>
-        Start a conversation by asking a question
-      </Text>
+      <Text style={styles.emptyStateDescription}>Start a conversation by asking a question</Text>
       {role.examples.length > 0 && (
         <View style={styles.examplesContainer}>
           <Text style={styles.examplesTitle}>Suggested questions:</Text>
@@ -383,9 +393,7 @@ export default function ChatScreen() {
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>{role.title}</Text>
-          {role.description && (
-            <Text style={styles.headerDescription}>{role.description}</Text>
-          )}
+          {role.description && <Text style={styles.headerDescription}>{role.description}</Text>}
         </View>
       </View>
 
@@ -404,11 +412,7 @@ export default function ChatScreen() {
           </>
         )}
         {isSending && (
-          <View
-            style={[
-              styles.messageBubbleContainer,
-              styles.modelBubbleContainer,
-            ]}>
+          <View style={[styles.messageBubbleContainer, styles.modelBubbleContainer]}>
             <View style={styles.avatarContainer}>
               <View style={styles.aiAvatar}>
                 <Ionicons name="sparkles" size={16} color="#FFF" />
@@ -471,10 +475,7 @@ export default function ChatScreen() {
       <View style={styles.inputContainer}>
         {/* Image Upload Button */}
         <TouchableOpacity
-          style={[
-            styles.iconButton,
-            isSending && styles.iconButtonDisabled,
-          ]}
+          style={[styles.iconButton, isSending && styles.iconButtonDisabled]}
           onPress={handleImagePick}
           disabled={isSending}
           accessibilityLabel="upload-image-button">
@@ -484,17 +485,36 @@ export default function ChatScreen() {
         {/* Text Input */}
         <TextInput
           placeholder="Type your message..."
-          placeholderTextColor="#999"
-          style={styles.input}
-          accessibilityLabel="chat-input"
           value={inputText}
           onChangeText={setInputText}
+          style={[styles.input, {outline: 'none'}]}
           editable={!isSending}
-          onSubmitEditing={onSendMessage}
-          returnKeyType="send"
-          submitBehavior="blurAndSubmit"
           multiline
+          blurOnSubmit={false} // ← Required so Enter does NOT trigger onSubmitEditing
           maxLength={1000}
+          onSubmitEditing={() => {
+            // This fires ONLY when the keyboard has a Send button (not Enter)
+            if (Platform.OS !== 'web') onSendMessage();
+          }}
+          onKeyPress={(e) => {
+            if (Platform.OS === 'web') {
+              const key = e.nativeEvent.key;
+
+              // Cast to "any" to access shiftKey safely
+              const shiftKey = (e.nativeEvent as any).shiftKey;
+
+              // Shift + Enter → New line
+              if (key === 'Enter' && shiftKey) {
+                return;
+              }
+
+              // Enter → Send
+              if (key === 'Enter' && !shiftKey) {
+                e.preventDefault();
+                onSendMessage();
+              }
+            }
+          }}
         />
 
         {/* Send Button */}
@@ -506,10 +526,7 @@ export default function ChatScreen() {
           onPress={onSendMessage}
           disabled={isSending || inputText.trim() === ''}
           accessibilityLabel="send-button">
-          <Send
-            size={20}
-            color="#FFF"
-          />
+          <Send size={20} color="#FFF" />
         </TouchableOpacity>
       </View>
     </Container>

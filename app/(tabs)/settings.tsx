@@ -8,11 +8,13 @@ import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import { useAuth } from '@/firebase/hooks/useAuth'
 import { useUser, useUpdateUser } from '@/firebase/hooks/useUser'
+import { usePostHog } from 'posthog-react-native'
 
 export default function settings() {
   const { currentUser: user,  deleteAccount, reauthenticate, updatePassword, signOut,  isDeletingAccount, isSigningOut, isReauthenticating, isUpdatingPassword,  } = useAuth()
   const { data: userProfile, isLoading: profileLoading } = useUser(user?.uid || '')
   const updateUserMutation = useUpdateUser()
+  const posthog = usePostHog();
 
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false)
@@ -27,7 +29,9 @@ export default function settings() {
   const [editEmail, setEditEmail] = useState('')
   const [editPhotoURL, setEditPhotoURL] = useState('')
   // added state for date (birth date / editable date)
-
+  useEffect(() => {
+        posthog.capture("Settings screen loaded, user Id: " + posthog.getDistinctId());
+    }, [])
   useEffect(() => {
     
     if (userProfile) {
