@@ -3,7 +3,7 @@
     "name": "LifePilot",
     "slug": "LifePilot",
     "version": "1.0.0",
-    "scheme": "LifePilot",
+    "scheme": "lifepilot",
     "platforms": ["ios", "android", "web"],
     "web": {
       "bundler": "metro",

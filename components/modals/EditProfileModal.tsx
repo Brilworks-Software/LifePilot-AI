@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Pressable,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { pickImageToBase64, base64ToImageUri } from '@/services/imageConversationService'
@@ -58,155 +59,118 @@ export function EditProfileModal({
   return (
     <Modal
       visible={visible}
+      transparent
       animationType="fade"
-      transparent={true}
-      onRequestClose={onClose}
       statusBarTranslucent
+      onRequestClose={onClose}
     >
       <KeyboardAvoidingView
         style={styles.overlay}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <TouchableOpacity
-          style={styles.backdrop}
-          activeOpacity={1}
-          onPress={onClose}
-        >
-          <View style={styles.modalContainer}>
-            <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
-              <View style={styles.modalContent}>
-                {/* Header */}
-                <View style={styles.header}>
-                  <View style={styles.headerContent}>
-                    <View style={styles.iconContainer}>
-                      <Ionicons name="person-circle" size={28} color="#6366F1" />
-                    </View>
-                    <Text style={styles.title}>Edit Profile</Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={onClose}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <Ionicons name="close-circle" size={28} color="#9CA3AF" />
-                  </TouchableOpacity>
+        {/* Backdrop */}
+        <Pressable style={styles.backdrop} onPress={onClose}>
+          {/* Modal Container */}
+          <Pressable style={styles.modalContainer} onPress={() => {}}>
+            <View style={styles.modalContent}>
+              {/* Header */}
+              <View style={styles.header}>
+                <View style={styles.headerContent}>
+                  <Ionicons name="person-circle" size={28} color="#6366F1" />
+                  <Text style={styles.title}>Edit Profile</Text>
+                </View>
+                <Pressable onPress={onClose} hitSlop={10}>
+                  <Ionicons name="close-circle" size={28} color="#9CA3AF" />
+                </Pressable>
+              </View>
+
+              {/* Scrollable Body */}
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled
+                contentContainerStyle={styles.body}
+              >
+                {/* Name */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Full Name</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your name"
+                    value={name}
+                    onChangeText={onNameChange}
+                  />
                 </View>
 
-                {/* Body */}
-                <ScrollView
-                  style={styles.body}
-                  showsVerticalScrollIndicator={false}
-                  keyboardShouldPersistTaps="handled"
-                >
-                  {/* Name Input */}
-                  <View style={styles.inputGroup}>
-                    <View style={styles.labelContainer}>
-                      <Ionicons name="person-outline" size={16} color="#6366F1" />
-                      <Text style={styles.label}>Full Name</Text>
-                    </View>
+                {/* Email */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Email Address</Text>
+                  <View style={styles.inputWrapper}>
                     <TextInput
-                      style={styles.input}
-                      placeholder="Enter your name"
-                      placeholderTextColor="#9CA3AF"
-                      value={name}
-                      onChangeText={onNameChange}
-                      autoCapitalize="words"
+                      style={[styles.input, styles.disabledInput]}
+                      value={email}
+                      editable={false}
+                    />
+                    <Ionicons
+                      name="lock-closed"
+                      size={16}
+                      color="#9CA3AF"
+                      style={styles.lockIcon}
                     />
                   </View>
+                </View>
 
-                  {/* Email Input (Disabled, auto-filled) */}
-                  <View style={styles.inputGroup}>
-                    <View style={styles.labelContainer}>
-                      <Ionicons name="mail-outline" size={16} color="#6366F1" />
-                      <Text style={styles.label}>Email Address</Text>
-                    </View>
-                    <View style={styles.inputWrapper}>
-                      <TextInput
-                        style={[styles.input, styles.disabledInput]}
-                        placeholder="Email"
-                        placeholderTextColor="#9CA3AF"
-                        value={email}
-                        editable={false}
-                      />
-                      <View style={styles.lockIcon}>
-                        <Ionicons name="lock-closed" size={16} color="#9CA3AF" />
-                      </View>
-                    </View>
-                    <View style={styles.hintContainer}>
-                      <Ionicons name="information-circle-outline" size={12} color="#6B7280" />
-                      <Text style={styles.hintText}>Email cannot be changed</Text>
-                    </View>
-                  </View>
+                {/* Profile Image */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Profile Picture</Text>
 
-                  {/* Photo URL Input with Image Picker */}
-                  <View style={styles.inputGroup}>
-                    <View style={styles.labelContainer}>
-                      <Ionicons name="image-outline" size={16} color="#6366F1" />
-                      <Text style={styles.label}>Profile Picture</Text>
-                    </View>
-                    
-                    {/* Preview Image if URL exists */}
-                    {photoURL && (
-                      <View style={styles.imagePreviewContainer}>
-                        <Image 
-                          source={{ uri: photoURL }} 
-                          style={styles.imagePreview}
-                          resizeMode="cover"
-                        />
-                      </View>
-                    )}
+                  {photoURL && (
+                    <Image
+                      source={{ uri: photoURL }}
+                      style={styles.imagePreview}
+                    />
+                  )}
 
-                    {/* Pick Image Button */}
-                    <TouchableOpacity
-                      style={styles.pickImageButton}
-                      onPress={handlePickImage}
-                      disabled={isPickingImage}
-                      activeOpacity={0.7}
-                    >
-                      {isPickingImage ? (
-                        <ActivityIndicator color="#6366F1" size="small" />
-                      ) : (
-                        <>
-                          <Ionicons name="camera" size={20} color="#6366F1" />
-                          <Text style={styles.pickImageButtonText}>
-                            {photoURL ? 'Change Picture' : 'Pick from Gallery'}
-                          </Text>
-                        </>
-                      )}
-                    </TouchableOpacity>
-
-                  </View>
-
-                  {/* Save Button */}
-                  <TouchableOpacity
-                    style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
-                    onPress={onSave}
-                    disabled={isSaving}
-                    activeOpacity={0.8}
+                  <Pressable
+                    style={styles.pickImageButton}
+                    onPress={handlePickImage}
+                    disabled={isPickingImage}
                   >
-                    {isSaving ? (
-                      <ActivityIndicator color="#FFFFFF" size="small" />
+                    {isPickingImage ? (
+                      <ActivityIndicator color="#6366F1" />
                     ) : (
                       <>
-                        <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
-                        <Text style={styles.saveButtonText}>Save Changes</Text>
+                        <Ionicons name="camera" size={20} color="#6366F1" />
+                        <Text style={styles.pickImageButtonText}>
+                          {photoURL ? 'Change Picture' : 'Pick from Gallery'}
+                        </Text>
                       </>
                     )}
-                  </TouchableOpacity>
+                  </Pressable>
+                </View>
+              </ScrollView>
 
-                  {/* Cancel Button */}
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={onClose}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-                </ScrollView>
+              {/* Actions */}
+              <View style={styles.actions}>
+                <Pressable
+                  style={[styles.saveButton, isSaving && styles.disabled]}
+                  onPress={onSave}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.saveText}>Save Changes</Text>
+                  )}
+                </Pressable>
+
+                <Pressable onPress={onClose}>
+                  <Text style={styles.cancelText}>Cancel</Text>
+                </Pressable>
               </View>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
       </KeyboardAvoidingView>
     </Modal>
   )
@@ -215,203 +179,111 @@ export function EditProfileModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   backdrop: {
     flex: 1,
-    width: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
   },
   modalContainer: {
-    width: '100%',
-    maxWidth: 500,
     maxHeight: '90%',
+    borderRadius: 24,
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#fff',
     borderRadius: 24,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
   },
   header: {
+    padding: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-    backgroundColor: '#FAFBFC',
+    borderColor: '#eee',
   },
   headerContent: {
     flexDirection: 'row',
+    gap: 10,
     alignItems: 'center',
-    flex: 1,
-  },
-  iconContainer: {
-    marginRight: 12,
   },
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#111827',
-    letterSpacing: -0.5,
-  },
-  closeButton: {
-    padding: 4,
   },
   body: {
-    paddingHorizontal: 24,
-    paddingVertical: 24,
-    maxHeight: 500,
+    padding: 24,
+    paddingBottom: 32,
   },
   inputGroup: {
     marginBottom: 24,
   },
-  labelContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
   label: {
-    fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
-    marginLeft: 6,
-    letterSpacing: 0.2,
+    marginBottom: 8,
   },
   inputWrapper: {
     position: 'relative',
   },
   input: {
     backgroundColor: '#F9FAFB',
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: '#111827',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 1,
-      },
-    }),
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
   },
   disabledInput: {
     backgroundColor: '#F3F4F6',
     color: '#6B7280',
-    paddingRight: 40,
   },
   lockIcon: {
     position: 'absolute',
     right: 14,
-    top: 14,
-  },
-  hintContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    gap: 6,
-  },
-  hintText: {
-    fontSize: 12,
-    color: '#6B7280',
-    lineHeight: 16,
-  },
-  imagePreviewContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
+    top: 16,
   },
   imagePreview: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    borderWidth: 3,
-    borderColor: '#6366F1',
+    alignSelf: 'center',
+    marginBottom: 16,
   },
   pickImageButton: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#EEF2FF',
-    borderWidth: 1.5,
-    borderColor: '#6366F1',
-    borderRadius: 14,
-    paddingVertical: 14,
-    marginBottom: 12,
     gap: 8,
+    justifyContent: 'center',
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#6366F1',
+    backgroundColor: '#EEF2FF',
   },
   pickImageButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
     color: '#6366F1',
-    letterSpacing: 0.2,
+    fontWeight: '600',
   },
-  orText: {
-    fontSize: 13,
-    color: '#9CA3AF',
-    textAlign: 'center',
-    marginBottom: 12,
-    fontWeight: '500',
+  actions: {
+    borderTopWidth: 1,
+    borderColor: '#eee',
+    padding: 20,
   },
   saveButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: '#6366F1',
+    padding: 16,
     borderRadius: 14,
-    paddingVertical: 16,
-    marginTop: 8,
-    gap: 8,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#6366F1',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
-  },
-  saveButtonDisabled: {
-    opacity: 0.7,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    letterSpacing: 0.3,
-  },
-  cancelButton: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    marginTop: 12,
   },
-  cancelButtonText: {
-    fontSize: 15,
-    fontWeight: '500',
+  saveText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  cancelText: {
+    textAlign: 'center',
+    marginTop: 12,
     color: '#6B7280',
   },
-})
+  disabled: {
+    opacity: 0.7,
+  },
+});
+
 

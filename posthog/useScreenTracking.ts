@@ -24,7 +24,7 @@ export function useScreenTracking() {
     // 🌐 WEB
     if (Platform.OS === 'web') {
       posthogWeb.capture('$pageview', {
-        path: pathname,
+        path: screenName,
       });
     }
 

@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PostHogProvider } from 'posthog-react-native';
 import { useScreenTracking } from '@/firebase/hooks/useScreenTracking';
 import { useUserTracking } from '@/firebase/hooks/useUserTracking';
-import { Platform } from 'react-native';
+import { Platform, StatusBar } from 'react-native';
 import posthog from 'posthog-js';
 import {useScreenTracking as PostHogScreenTracking} from "@/posthog/useScreenTracking"
 
@@ -37,6 +37,7 @@ export default function Layout() {
     <PostHogUniversalProvider>
       <QueryClientProvider client={queryClient}>
         <AppContent />
+        <StatusBar barStyle="dark-content" />
       </QueryClientProvider>
     </PostHogUniversalProvider>
   );
