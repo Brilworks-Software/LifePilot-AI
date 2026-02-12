@@ -4,7 +4,11 @@
     "slug": "LifePilot",
     "version": "1.0.0",
     "scheme": "lifepilot",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "web": {
       "bundler": "metro",
       "output": "static",
@@ -21,12 +25,16 @@
           },
           "android": {
             "minSdkVersion": 24,
-            "abiFilters": ["armeabi-v7a", "arm64-v8a"],
+            "abiFilters": [
+              "armeabi-v7a",
+              "arm64-v8a"
+            ],
             "extraMavenRepos": [
               "https://jitpack.io",
               "https://oss.sonatype.org/content/repositories/snapshots/"
             ],
-            "enableProguardInReleaseBuilds": true
+            "enableProguardInReleaseBuilds": true,
+            "enableMinifyInReleaseBuilds": true
           }
         }
       ]
@@ -43,11 +51,16 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.brilworks.lifePilot",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
