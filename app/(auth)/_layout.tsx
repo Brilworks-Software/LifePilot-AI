@@ -11,6 +11,7 @@ export default function AuthLayout() {
         <Stack.Screen name='signUp' />
         <Stack.Screen name='forgotPassword' />
         <Stack.Screen name='onboarding' />
+        <Stack.Screen name='deleteAccount' />
     </Stack>
   );
 }
